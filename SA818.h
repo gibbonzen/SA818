@@ -38,7 +38,8 @@ class SA818 {
         SA818(Stream*);
         ~SA818();
 
-        void debug(bool);
+        void setDebug(bool);
+        void debug(String);
         void timeout(long = 1000);
 
         bool send(char*, int = 0, char** = 0);
@@ -54,8 +55,14 @@ SA818::~SA818() {
     lastResponse_.req = 0;
 }
 
-void SA818::debug(bool deb) {
+void SA818::setDebug(bool deb) {
     debug_ = deb;
+}
+
+void SA818::debug(String str) {
+    if(Serial && debug_) {
+        Serial.print(str);
+    }
 }
 
 bool SA818::send(char* cmd, int size, char** args) {
@@ -71,8 +78,7 @@ bool SA818::send(char* cmd, int size, char** args) {
 }
 
 bool SA818::request(Request* req) {
-    if(debug_)
-        Serial.print("-> ");
+    debug("-> ");
 
     print(req->req);
     
@@ -92,22 +98,19 @@ bool SA818::request(Request* req) {
 
     waitResponse(&resp);
 
-    if(debug_)
-        Serial.println("<- " + resp.raw);
+    debug("<- " + resp.raw + "\n");
 
     bool ok = success(&resp);
     return ok;
 }
 
 void SA818::print(char* str) {
-    if(debug_)
-        Serial.print(str);
+    debug(str);
     stream_->print(str);
 }
 
 void SA818::flush() {
-    if(debug_)
-        Serial.println();
+    debug("\n");
     stream_->print("\n\r\n");
 }
 
