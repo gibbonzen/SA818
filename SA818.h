@@ -29,6 +29,7 @@ class SA818 {
         bool request(Request*);
         void print(char*);
         void flush();
+        void debug(String);
 
         bool readByte(byte*);
         bool waitResponse(Response*);
@@ -39,7 +40,6 @@ class SA818 {
         ~SA818();
 
         void setDebug(bool);
-        void debug(String);
         void timeout(long = 1000);
 
         bool send(char*, int = 0, char** = 0);
