@@ -2,7 +2,6 @@
 #define SA818_H
 
 #include <Stream.h>
-#include <math.h>
 
 class Request {
     public:
@@ -21,15 +20,6 @@ class Response {
 
 enum Type { SA_818 = 0, SA_868 = 1 };
 
-struct Conf {
-    byte bw;
-    int tx_f;
-    int rx_f;
-    int tx_sub;
-    int sq;
-    int rx_sub;
-};
-
 class SA818 {
     private:
         byte type_ = Type::SA_818;
@@ -38,9 +28,7 @@ class SA818 {
         long timeout_ = 1000;
 
         Response lastResponse_;
-
-        Conf conf_ = {};
-        // byte bw_ = 0;
+        byte bw_;
 
         bool request(Request*);
         void print(char*);
@@ -52,7 +40,7 @@ class SA818 {
 
         String ctcss(int);
 
-        float loopScan(float, bool, float = 0);        
+        float loopScan(float, bool, float = 0);
 
     public:
         SA818(Stream*);
@@ -77,7 +65,6 @@ class SA818 {
 
         float next(float, float = 0);
         float previous(float, float = 0);
-        
 };
 
 #endif
@@ -220,17 +207,17 @@ char* SA818::response() {
 }
 
 String SA818::ctcss(int sub) {
-    char s[4];
+    String ssub = String(abs(sub));
     if(sub < 0)
-        sprintf(s, "%03dN", abs(sub));
+        ssub += "N";
+    if(sub >= 23)
+        ssub += "I";
 
-    else if(sub >= 0 && sub < 23)
-        sprintf(s, "%04d", sub);
-
-    else if(sub >= 23) 
-        sprintf(s, "%03dI", sub);
-
-    return String(s);
+    String res = ssub;
+    for (int i = ssub.length(); i < 4; i++) {
+        res = "0" + res;
+    }
+    return String(res);
 }
 
 bool SA818::connect() {
@@ -238,12 +225,7 @@ bool SA818::connect() {
 }
 
 bool SA818::setGroup(byte bw, float tx_f, float rx_f, int tx_sub, byte sq, int rx_sub) {
-    conf_.bw = bw;
-    conf_.tx_f = tx_f;
-    conf_.rx_f = rx_f;
-    conf_.tx_sub = tx_sub;
-    conf_.sq = sq;
-    conf_.rx_sub = rx_sub;
+    bw_ = bw;
 
     String b = String(bw);
     String tf = String(tx_f, 4);
@@ -259,7 +241,6 @@ bool SA818::setGroup(byte bw, float tx_f, float rx_f, int tx_sub, byte sq, int r
         s.c_str(),
         rsub.c_str()
     };
-    
     return send("AT+DMOSETGROUP", 6, params);
 }
 
@@ -320,7 +301,7 @@ float SA818::loopScan(float mhz, bool dir, float khz) {
     if(khz == 0) {
         khz = 12.5; // 12.5K
 
-        if(conf_.bw == 1) // 25K
+        if(bw_ == 1) // 25K
             khz = 25;
     }
 
@@ -340,3 +321,6 @@ float SA818::next(float mhz, float khz) {
 float SA818::previous(float mhz, float khz) {
     return loopScan(mhz, false, khz);
 }
+
+/////////////////////////////////////////////////
+
