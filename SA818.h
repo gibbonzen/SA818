@@ -17,6 +17,7 @@ class Response {
 };
 
 enum Type { SA_818 = 0, SA_868 = 1 };
+enum Band { UHF = 0, VHF = 1 }; //400-480MHz // 134-174MHz
 
 class SA818 {
     private:
