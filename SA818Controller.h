@@ -4,7 +4,7 @@
 class SA818Controller {
     private:
         SA818* sa = 0;
-        byte type_ = Type::SA_818;
+        byte type_ = Model::SA_818;
         byte band_ = Band::VHF;
 
         byte bw_;
@@ -22,7 +22,7 @@ class SA818Controller {
     public:
         SA818Controller(SA818*);
         ~SA818Controller();
-        void setType(Type = Type::SA_818);
+        void setModel(Model = Model::SA_818);
         void setBand(Band = Band::VHF);
         String response();
         String result();
@@ -33,13 +33,13 @@ class SA818Controller {
         void setTXSub(int);
         void setSQ(byte);
         void setRXSub(int);
-        bool updateGroup();
+        bool update();
 
         bool connect();
         bool setGroup(byte, float, float, int, byte, int);
         bool scan(float);
-        bool setVolume(int);
-        bool setFilter(int, int, int);
+        bool setVolume(byte);
+        bool setFilter(byte, byte, byte);
         bool openTail();
         bool closeTail();
         String rssi();
@@ -60,7 +60,7 @@ SA818Controller::~SA818Controller() {
     sa = 0;
 }
 
-void SA818Controller::setType(Type type) {
+void SA818Controller::setModel(Model type) {
     type_ = type;
 }
 
@@ -99,7 +99,7 @@ void SA818Controller::setRXSub(int rx) {
     rx_sub_ = rx;
 }
 
-bool SA818Controller::updateGroup() {
+bool SA818Controller::update() {
     return setGroup(bw_, tx_f_, rx_f_, tx_sub_, sq_, rx_sub_);
 }
 
@@ -153,13 +153,13 @@ bool SA818Controller::scan(float freq) {
     return sa->send(cmd.c_str());
 }
 
-bool SA818Controller::setVolume(int vol) {
+bool SA818Controller::setVolume(byte vol) {
     String v =  String(vol);
     char* params[] = { v.c_str() };
     return sa->send("AT+DMOSETVOLUME", 1, params);
 }
 
-bool SA818Controller::setFilter(int emph, int high, int low) {
+bool SA818Controller::setFilter(byte emph, byte high, byte low) {
     String e = String(emph);
     String h = String(high);
     String l = String(low);
@@ -177,7 +177,7 @@ bool SA818Controller::closeTail() {
 
 String SA818Controller::rssi() {
     String cmd = "RSSI?";
-    if(type_ == Type::SA_868)
+    if(type_ == Model::SA_868)
         cmd = "AT+RSSI?";
 
     if(sa->send(cmd.c_str()))

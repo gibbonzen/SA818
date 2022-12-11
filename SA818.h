@@ -16,7 +16,7 @@ class Response {
         String res;
 };
 
-enum Type { SA_818 = 0, SA_868 = 1 };
+enum Model { SA_818 = 0, SA_868 = 1 };
 enum Band { UHF = 0, VHF = 1 }; //400-480MHz // 134-174MHz
 
 class SA818 {
@@ -40,8 +40,8 @@ class SA818 {
         SA818(Stream*);
         ~SA818();
 
-        void setDebug(bool);
-        void timeout(long = 1000);
+        void verbose();
+        void setTimeout(long = 1000);
 
         bool send(char*, int = 0, char** = 0);
         Response* response();
@@ -56,8 +56,12 @@ SA818::~SA818() {
     lastResponse_.req = 0;
 }
 
-void SA818::setDebug(bool deb) {
-    debug_ = deb;
+void SA818::verbose() {
+    debug_ = true;
+}
+
+void SA818::setTimeout(long timeout) {
+    timeout_ = timeout;
 }
 
 void SA818::debug(String str) {
